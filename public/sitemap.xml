@@ -1,6 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://ai-tools-website-gilt.vercel.app/</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/about</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/privacy-policy</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/terms-of-service</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog/how-to-write-a-perfect-resume-in-2025</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog/10-tips-for-a-great-cover-letter</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog/how-ai-is-changing-job-applications</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog/best-free-tools-for-job-seekers</loc></url>
+  <url><loc>https://ai-tools-website-gilt.vercel.app/blog/how-to-write-a-professional-email</loc></url>
   <url><loc>https://ai-tools-website-gilt.vercel.app/tools/resume-builder</loc></url>
   <url><loc>https://ai-tools-website-gilt.vercel.app/tools/cover-letter</loc></url>
   <url><loc>https://ai-tools-website-gilt.vercel.app/tools/email-writer</loc></url>
