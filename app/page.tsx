@@ -60,6 +60,7 @@ export default function Home() {
 
             <div className="hidden md:flex items-center gap-8">
               <Link href="/#tools" className="text-gray-300 hover:text-white transition">Tools</Link>
+              <Link href="/blog" className="text-gray-300 hover:text-white transition">Blog</Link>
               <Link href="/#features" className="text-gray-300 hover:text-white transition">Features</Link>
               <Link href="/#testimonials" className="text-gray-300 hover:text-white transition">Testimonials</Link>
               <button className="btn-primary text-sm py-2 px-6">
@@ -86,6 +87,7 @@ export default function Home() {
       {/* Mobile Menu */}
       <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`}>
         <Link href="/#tools" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Tools</Link>
+        <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Blog</Link>
         <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Features</Link>
         <Link href="/#testimonials" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Testimonials</Link>
         <button className="btn-primary mt-4">
@@ -431,7 +433,7 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Resources</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Career Blog</a></li>
+                <li><Link href="/blog" className="hover:text-white transition">Career Blog</Link></li>
                 <li><a href="#" className="hover:text-white transition">Resume Tips</a></li>
                 <li><a href="#" className="hover:text-white transition">Job Search Guide</a></li>
                 <li><a href="#" className="hover:text-white transition">Interview Prep</a></li>
@@ -440,21 +442,23 @@ export default function Home() {
             <div>
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-gray-400 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact Us</a></li>
+                <li><Link href="/privacy-policy" className="hover:text-white transition">Privacy Policy</Link></li>
+                <li><Link href="/terms-of-service" className="hover:text-white transition">Terms of Service</Link></li>
+                <li><Link href="/about" className="hover:text-white transition">About Us</Link></li>
+                <li><a href="mailto:contact@aicareertools.in" className="hover:text-white transition">Contact Us</a></li>
               </ul>
             </div>
           </div>
           <div className="pt-8 border-t border-white/10 text-center">
-            <p className="text-gray-500 text-sm mb-2">&copy; 2025 FreeAITools.in - All rights reserved</p>
+            <p className="text-gray-500 text-sm mb-2">&copy; 2025 AI Career Tools - All rights reserved</p>
             <div className="flex items-center justify-center gap-4 text-sm">
-              <a href="#" className="text-gray-400 hover:text-white transition">Privacy Policy</a>
+              <Link href="/privacy-policy" className="text-gray-400 hover:text-white transition">Privacy Policy</Link>
               <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition">Terms of Service</a>
+              <Link href="/terms-of-service" className="text-gray-400 hover:text-white transition">Terms of Service</Link>
               <span className="text-gray-600">|</span>
-              <a href="#" className="text-gray-400 hover:text-white transition">Contact Us</a>
+              <Link href="/about" className="text-gray-400 hover:text-white transition">About Us</Link>
+              <span className="text-gray-600">|</span>
+              <a href="mailto:contact@aicareertools.in" className="text-gray-400 hover:text-white transition">Contact Us</a>
             </div>
           </div>
         </div>
