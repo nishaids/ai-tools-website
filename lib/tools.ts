@@ -69,7 +69,9 @@ Create a modern, clean resume with:
 3. ATS-friendly formatting with relevant keywords
 4. Clean section hierarchy: Summary, Experience, Education, Skills
 5. Action verbs at start of each bullet point
-6. Remove any filler words - keep it concise`,
+6. Remove any filler words - keep it concise
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Resume Builder - Create ATS-Optimized Resumes',
     metaDescription: 'Create a professional, ATS-optimized resume in seconds. Free AI resume builder with modern templates. No signup required.',
   },
@@ -113,7 +115,9 @@ Write a 3-4 paragraph cover letter that:
 3. Shows knowledge of the company and its mission
 4. Ends with a strong call to action
 
-Use professional tone, specific examples, and quantifiable results.`,
+Use professional tone, specific examples, and quantifiable results.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Cover Letter Writer - Professional Cover Letters',
     metaDescription: 'Generate professional cover letters that get interviews. Free AI cover letter generator with custom templates.',
   },
@@ -146,7 +150,9 @@ Create an email with:
 - Professional greeting
 - 2-3 short paragraphs max
 - Clear call to action
-- Professional sign-off`,
+- Professional sign-off
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Email Writer - Professional Email Generator',
     metaDescription: 'Write professional emails instantly with AI. Choose your tone and purpose. Free email writer for business.',
   },
@@ -190,7 +196,9 @@ Create a clean, professional invoice with:
 - Itemized table with descriptions and amounts
 - Subtotal, tax (if applicable), total
 - Payment instructions
-- Professional footer`,
+- Professional footer
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Invoice Generator - Professional Invoices',
     metaDescription: 'Generate professional invoices instantly with AI. Perfect for freelancers and small businesses.',
   },
@@ -220,7 +228,9 @@ Create 3 different bio versions optimized for {platform}:
 2. Medium version (150-300 characters)
 3. Long version (300-500 characters)
 
-Show each as it would appear in a social media profile card.`,
+Show each as it would appear in a social media profile card.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Bio Generator - Personal Bio Writer',
     metaDescription: 'Generate engaging bios for Twitter, LinkedIn, Instagram, and more. Free AI bio writer.',
   },
@@ -253,7 +263,9 @@ Create:
 2. Feature highlights with benefits (not just specs)
 3. An ecommerce-style card preview showing the product
 
-Make it conversion-focused with strong benefit statements.`,
+Make it conversion-focused with strong benefit statements.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Product Description Writer',
     metaDescription: 'Write compelling product descriptions that convert. Free AI tool for e-commerce and marketing.',
   },
@@ -282,7 +294,9 @@ For each title provide:
 2. Estimated engagement score (1-10)
 3. Why it would perform well
 
-Format as a clean list with engagement indicators.`,
+Format as a clean list with engagement indicators.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Blog Title Generator',
     metaDescription: 'Generate viral blog titles instantly. Free AI tool for bloggers and content creators.',
   },
@@ -311,7 +325,9 @@ Create:
 2. A set of 10-15 relevant hashtags
 3. Show the preview as it would appear in an Instagram post mockup
 
-Make it engaging, authentic, and platform-optimized.`,
+Make it engaging, authentic, and platform-optimized.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Instagram Caption Writer',
     metaDescription: 'Create viral Instagram captions instantly. Free AI tool for influencers and creators.',
   },
@@ -343,7 +359,9 @@ Create:
 3. Open rate prediction
 4. Clear call to action
 
-Make it personalized, value-driven, and easy to respond to.`,
+Make it personalized, value-driven, and easy to respond to.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI Cold Email Writer',
     metaDescription: 'Write personalized cold emails that get responses. Free AI outreach tool.',
   },
@@ -377,7 +395,9 @@ Create a full script with:
 5. Call to action (subscribe, like, comment)
 6. End screen suggestions
 
-Include [PAUSE], [B-ROLL], [GRAPHICS] cues where appropriate.`,
+Include [PAUSE], [B-ROLL], [GRAPHICS] cues where appropriate.
+
+Important: Do not include any conversational intro, preamble, or outro. Start your response DIRECTLY with the content itself. No filler sentences.`,
     metaTitle: 'Free AI YouTube Script Writer',
     metaDescription: 'Write engaging YouTube scripts in minutes. Free AI tool for YouTubers.',
   },

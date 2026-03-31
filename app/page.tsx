@@ -62,7 +62,7 @@ export default function Home() {
               <Link href="/#tools" className="text-gray-300 hover:text-white transition">Tools</Link>
               <Link href="/blog" className="text-gray-300 hover:text-white transition">Blog</Link>
               <Link href="/#features" className="text-gray-300 hover:text-white transition">Features</Link>
-              <Link href="/#testimonials" className="text-gray-300 hover:text-white transition">Testimonials</Link>
+              <Link href="/#how-it-works" className="text-gray-300 hover:text-white transition">How It Works</Link>
               <button className="btn-primary text-sm py-2 px-6">
                 <span>Get Started</span>
               </button>
@@ -89,7 +89,7 @@ export default function Home() {
         <Link href="/#tools" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Tools</Link>
         <Link href="/blog" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Blog</Link>
         <Link href="/#features" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Features</Link>
-        <Link href="/#testimonials" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">Testimonials</Link>
+        <Link href="/#how-it-works" onClick={() => setMobileMenuOpen(false)} className="text-2xl font-semibold text-white hover:text-violet-400">How It Works</Link>
         <button className="btn-primary mt-4">
           <span>Get Started</span>
         </button>
@@ -171,26 +171,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section id="features" className="py-20 px-4">
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-5xl font-bold mb-4">
+              How It <span className="gradient-text">Works</span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Create professional documents in 3 simple steps
+            </p>
+          </div>
           <div className="glass rounded-3xl p-8 md:p-12">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="stat-number">10,000+</div>
-                <div className="text-gray-400 mt-2">Resumes Generated</div>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+                  1
+                </div>
+                <h3 className="text-xl font-bold mb-3">Enter Your Details</h3>
+                <p className="text-gray-400">Fill in the form with your information — job title, experience, skills, or content topic.</p>
               </div>
               <div className="text-center">
-                <div className="stat-number">50,000+</div>
-                <div className="text-gray-400 mt-2">Happy Users</div>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+                  2
+                </div>
+                <h3 className="text-xl font-bold mb-3">AI Generates Instantly</h3>
+                <p className="text-gray-400">Our Gemini-powered AI creates polished, professional content tailored to your needs in seconds.</p>
               </div>
               <div className="text-center">
-                <div className="stat-number">4.9★</div>
-                <div className="text-gray-400 mt-2">User Rating</div>
-              </div>
-              <div className="text-center">
-                <div className="stat-number">247</div>
-                <div className="text-gray-400 mt-2">Generated This Hour</div>
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center mx-auto mb-6 text-2xl font-bold">
+                  3
+                </div>
+                <h3 className="text-xl font-bold mb-3">Download as PDF</h3>
+                <p className="text-gray-400">Copy your content or download it as a clean, professional PDF — ready to use immediately.</p>
               </div>
             </div>
           </div>
@@ -284,128 +297,9 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section id="testimonials" className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-5xl font-bold mb-4">
-              Loved by <span className="gradient-text">Professionals</span>
-            </h2>
-            <p className="text-gray-400 text-lg">See what our users have to say</p>
-          </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="testimonial-card">
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-300 mb-6">"Landed my dream job at Google within 2 weeks of using this resume builder. The ATS optimization is incredible!"</p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center font-bold">SM</div>
-                <div>
-                  <div className="font-semibold">Sarah Mitchell</div>
-                  <div className="text-gray-500 text-sm">Software Engineer @ Google</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="testimonial-card">
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-300 mb-6">"I generate 50+ personalized cold emails daily for my sales team. This tool saved us 20 hours every week."</p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center font-bold">JC</div>
-                <div>
-                  <div className="font-semibold">James Chen</div>
-                  <div className="text-gray-500 text-sm">VP Sales @ TechStart</div>
-                </div>
-              </div>
-            </div>
 
-            <div className="testimonial-card">
-              <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                  </svg>
-                ))}
-              </div>
-              <p className="text-gray-300 mb-6">"My Instagram engagement increased 300% since I started using this caption generator. Absolutely brilliant!"</p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center font-bold">EW</div>
-                <div>
-                  <div className="font-semibold">Emma Williams</div>
-                  <div className="text-gray-500 text-sm">Content Creator @ 500K followers</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-12 px-4 border-y border-white/10">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16 opacity-50">
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-              <span className="text-sm">256-bit Encrypted</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
-              </svg>
-              <span className="text-sm">GDPR Compliant</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
-              </svg>
-              <span className="text-sm">SOC 2 Certified</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Newsletter Section */}
-      <section className="py-20 px-4">
-        <div className="max-w-3xl mx-auto">
-          <div className="glass rounded-3xl p-8 md:p-12 text-center relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-violet-500/20 rounded-full blur-3xl" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-500/20 rounded-full blur-3xl" />
-            <div className="relative z-10">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">
-                Get 5 Free Premium Templates
-              </h2>
-              <p className="text-gray-400 mb-8">
-                Join 10,000+ professionals getting our weekly career tips and templates.
-              </p>
-              <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-6 py-4 bg-white/5 border border-white/10 rounded-xl focus:border-violet-500 focus:outline-none"
-                />
-                <button type="submit" className="btn-primary whitespace-nowrap">
-                  <span>Subscribe</span>
-                </button>
-              </form>
-              <p className="text-gray-500 text-sm mt-4">No spam, unsubscribe anytime.</p>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Footer */}
       <footer className="py-16 px-4 border-t border-white/10">

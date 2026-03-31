@@ -5,6 +5,9 @@ import Link from 'next/link';
 import { tools, Tool, InputField } from '@/lib/tools';
 import OutputRenderer from './OutputRenderer';
 import ProModal from './ProModal';
+import DownloadPdfButton from '@/components/DownloadPdfButton';
+import CopyButton from '@/components/CopyButton';
+import OutputHistory, { saveToHistory } from '@/components/OutputHistory';
 
 const STEPS = [
   { id: 1, label: 'Fill Details' },
@@ -13,12 +16,12 @@ const STEPS = [
 ];
 
 export default function ToolPage({ params }: { params: { slug: string } }) {
-  const [tool, setTool] = useState<Tool | null>(null);
+  const slug = params.slug;
+  const tool = tools.find((t) => t.slug === slug) || null;
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [output, setOutput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [copied, setCopied] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
@@ -28,10 +31,7 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
   const FREE_LIMIT = 3;
 
   useEffect(() => {
-    const foundTool = tools.find((t) => t.slug === params.slug);
-    setTool(foundTool || null);
-    
-    const savedUsage = localStorage.getItem(`usage_${params.slug}`);
+    const savedUsage = localStorage.getItem(`usage_${slug}`);
     if (savedUsage) {
       const { count, date } = JSON.parse(savedUsage);
       const today = new Date().toDateString();
@@ -39,7 +39,7 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
         setUsageCount(count);
       }
     }
-  }, [params.slug]);
+  }, [slug]);
 
   const handleInputChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -88,10 +88,11 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
 
       setOutput(data.result);
       setCurrentStep(3);
+      saveToHistory(slug, data.result);
 
       const newCount = usageCount + 1;
       setUsageCount(newCount);
-      localStorage.setItem(`usage_${params.slug}`, JSON.stringify({
+      localStorage.setItem(`usage_${slug}`, JSON.stringify({
         count: newCount,
         date: new Date().toDateString()
       }));
@@ -103,23 +104,6 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
     }
   };
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownload = () => {
-    const blob = new Blob([output], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${tool?.name.replace(/\s+/g, '-').toLowerCase() || 'document'}.md`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
 
   const handleRegenerate = async () => {
     if (usageCount >= FREE_LIMIT) {
@@ -158,10 +142,11 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
 
       setOutput(data.result);
       setCurrentStep(3);
+      saveToHistory(slug, data.result);
 
       const newCount = usageCount + 1;
       setUsageCount(newCount);
-      localStorage.setItem(`usage_${params.slug}`, JSON.stringify({
+      localStorage.setItem(`usage_${slug}`, JSON.stringify({
         count: newCount,
         date: new Date().toDateString()
       }));
@@ -415,13 +400,8 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
 
             {/* Right Column - Output */}
             <div className="space-y-6">
-              {/* Ad Placeholder */}
-              <div className="ad-placeholder h-48">
-                Advertisement
-              </div>
-
               {/* Output Section */}
-              <div className="glass rounded-3xl p-6 md:p-8">
+              <div className="glass rounded-3xl p-6 md:p-8 border border-white/10">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-xl font-bold flex items-center gap-2">
                     <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -429,38 +409,18 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
                     </svg>
                     Output
                   </h3>
-                  {output && (
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleCopy}
-                        className="p-2 hover:bg-white/10 rounded-lg transition"
-                        title="Copy"
-                      >
-                        {copied ? (
-                          <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                        ) : (
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                          </svg>
-                        )}
-                      </button>
-                      <button
-                        onClick={handleDownload}
-                        className="p-2 hover:bg-white/10 rounded-lg transition"
-                        title="Download"
-                      >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                      </button>
-                    </div>
-                  )}
                 </div>
 
                 {loading ? (
-                  <div className="space-y-4">
+                  <div className="space-y-4 py-8">
+                    <div className="flex flex-col items-center justify-center mb-6">
+                      <div className="loading-dots flex gap-1.5 mb-4">
+                        <span className="w-3 h-3 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-3 h-3 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-3 h-3 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
+                      <p className="text-sm text-gray-400 font-medium">Generating with AI...</p>
+                    </div>
                     <div className="skeleton h-4 w-3/4" />
                     <div className="skeleton h-4 w-full" />
                     <div className="skeleton h-4 w-5/6" />
@@ -469,18 +429,25 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
                     <div className="skeleton h-4 w-2/3" />
                   </div>
                 ) : output ? (
-                  <div>
-                    <OutputRenderer output={output} format={tool.outputFormat} />
-                    
-                    <button
-                      onClick={handleRegenerate}
-                      className="w-full mt-6 py-3 border border-white/20 rounded-xl font-medium hover:bg-white/5 transition flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      Generate Another Version
-                    </button>
+                  <div className="animate-fade-in">
+                    <div className="max-h-[600px] overflow-auto mb-4">
+                      <OutputRenderer output={output} format={tool.outputFormat} />
+                    </div>
+
+                    {/* Action buttons */}
+                    <div className="flex flex-wrap gap-3 pt-4 border-t border-white/10">
+                      <CopyButton text={output} />
+                      <DownloadPdfButton toolName={tool.name} content={output} />
+                      <button
+                        onClick={handleRegenerate}
+                        className="flex items-center gap-2 px-4 py-2.5 bg-white/10 text-white rounded-xl text-sm font-medium hover:bg-white/20 transition-all duration-200 border border-white/10"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Regenerate
+                      </button>
+                    </div>
                   </div>
                 ) : (
                   <div className="text-center py-16">
@@ -495,10 +462,8 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
                 )}
               </div>
 
-              {/* Bottom Ad */}
-              <div className="ad-placeholder h-48">
-                Advertisement
-              </div>
+              {/* Output History */}
+              <OutputHistory toolSlug={slug} toolName={tool.name} />
             </div>
           </div>
         </div>
