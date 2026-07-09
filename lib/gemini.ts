@@ -1,246 +1,145 @@
 import { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } from '@google/generative-ai';
-import { NextRequest } from 'next/server';
+import { generateWithGroq, isGroqConfigured } from './providers/groq';
 
-const MODELS = [
+/**
+ * Gemini model fallback ladder — newest/cheapest first. Update names here
+ * only; everything else (key rotation, Groq fallback) adapts automatically.
+ */
+export const GEMINI_MODELS = [
   'gemini-2.5-flash',
-  'gemini-1.5-flash', 
-  'gemini-1.5-flash-8b'
-];
+  'gemini-2.5-flash-lite',
+  'gemini-2.0-flash',
+] as const;
 
-const MAX_REQUESTS_PER_IP = 10;
-const RATE_LIMIT_WINDOW = 60 * 60 * 1000;
-
-interface RateLimitEntry {
-  count: number;
-  resetTime: number;
-}
-
-const rateLimitMap = new Map<string, RateLimitEntry>();
-
-function getRateLimitInfo(ip: string): { allowed: boolean; remaining: number; resetTime: number } {
-  const now = Date.now();
-  const entry = rateLimitMap.get(ip);
-
-  if (!entry || now > entry.resetTime) {
-    const resetTime = now + RATE_LIMIT_WINDOW;
-    rateLimitMap.set(ip, { count: 1, resetTime });
-    return { allowed: true, remaining: MAX_REQUESTS_PER_IP - 1, resetTime };
-  }
-
-  if (entry.count >= MAX_REQUESTS_PER_IP) {
-    return { allowed: false, remaining: 0, resetTime: entry.resetTime };
-  }
-
-  entry.count++;
-  return { allowed: true, remaining: MAX_REQUESTS_PER_IP - entry.count, resetTime: entry.resetTime };
-}
-
-function cleanExpiredEntries(): void {
-  const now = Date.now();
-  const entries = Array.from(rateLimitMap.entries());
-  for (const [ip, entry] of entries) {
-    if (now > entry.resetTime) {
-      rateLimitMap.delete(ip);
-    }
-  }
-}
-
-setInterval(cleanExpiredEntries, 5 * 60 * 1000);
+const REQUEST_TIMEOUT_MS = 30_000;
 
 function getApiKeys(): string[] {
   const keys: string[] = [];
-  
   if (process.env.GEMINI_API_KEY_1) keys.push(process.env.GEMINI_API_KEY_1);
   if (process.env.GEMINI_API_KEY_2) keys.push(process.env.GEMINI_API_KEY_2);
   if (process.env.GEMINI_API_KEY_3) keys.push(process.env.GEMINI_API_KEY_3);
-  
   if (keys.length === 0 && process.env.GEMINI_API_KEY) {
     keys.push(process.env.GEMINI_API_KEY);
   }
-  
   return keys;
 }
 
-interface GenerationResult {
-  success: boolean;
-  result?: string;
+export type GenerateErrorType =
+  | 'quota'
+  | 'invalid_key'
+  | 'network'
+  | 'model'
+  | 'timeout'
+  | 'unknown';
+
+export interface GenerateTextResult {
+  text?: string;
+  provider?: string;
   error?: string;
-  errorType?: 'quota' | 'invalid_key' | 'network' | 'model' | 'unknown';
-  usedKeyIndex?: number;
-  usedModel?: string;
+  errorType?: GenerateErrorType;
 }
 
-async function tryGenerateWithKey(
-  apiKey: string, 
-  prompt: string, 
-  modelIndex: number
-): Promise<GenerationResult> {
+const SAFETY_SETTINGS = [
+  { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+  { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+];
+
+function classifyError(err: unknown): { message: string; type: GenerateErrorType } {
+  const error = err as { message?: string; status?: number; name?: string };
+  const message = error.message?.toLowerCase() || '';
+  const code = error.status || 0;
+
+  if (error.name === 'AbortError' || message.includes('timeout') || message.includes('aborted')) {
+    return { message: 'Request timed out', type: 'timeout' };
+  }
+  if (code === 429 || message.includes('quota') || message.includes('rate limit') || message.includes('resource has been exhausted')) {
+    return { message: 'Quota exceeded', type: 'quota' };
+  }
+  if (code === 404 || message.includes('not found')) {
+    return { message: 'Model not available', type: 'model' };
+  }
+  if (code === 401 || code === 403 || message.includes('api key') || message.includes('permission')) {
+    return { message: 'Invalid API key', type: 'invalid_key' };
+  }
+  if (message.includes('fetch') || message.includes('network')) {
+    return { message: 'Network error', type: 'network' };
+  }
+  return { message: error.message || 'Unknown error', type: 'unknown' };
+}
+
+async function tryGeminiKey(apiKey: string, prompt: string): Promise<GenerateTextResult> {
   const genAI = new GoogleGenerativeAI(apiKey);
-  
-  for (let m = modelIndex; m < MODELS.length; m++) {
-    const modelName = MODELS[m];
-    console.log(`[Gemini] Trying key ${apiKey.slice(0, 15)}... with model: ${modelName}`);
-    
+
+  for (const modelName of GEMINI_MODELS) {
     try {
-      const model = genAI.getGenerativeModel({ 
+      const model = genAI.getGenerativeModel({
         model: modelName,
-        safetySettings: [
-          { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-          { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-        ],
+        safetySettings: SAFETY_SETTINGS,
+        generationConfig: {
+          responseMimeType: 'application/json',
+          temperature: 0.7,
+        },
       });
-      
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      
-      console.log(`[Gemini] Success with key ${apiKey.slice(0, 15)}... and model: ${modelName}`);
-      
-      return { 
-        success: true, 
-        result: text,
-        usedKeyIndex: getApiKeys().indexOf(apiKey),
-        usedModel: modelName
-      };
-    } catch (error: any) {
-      const errorMessage = error.message?.toLowerCase() || '';
-      const errorCode = error.status || '';
-      
-      console.error(`[Gemini] Error with model ${modelName}:`, errorMessage);
-      
-      if (errorCode === 429 || errorMessage.includes('quota') || errorMessage.includes('rate limit')) {
-        if (m < MODELS.length - 1) {
-          console.log(`[Gemini] Quota/Model issue, trying next model: ${MODELS[m + 1]}`);
-          continue;
-        }
-        return { 
-          success: false, 
-          error: 'Quota exceeded',
-          errorType: 'quota'
-        };
-      }
-      
-      if (errorCode === 404 || errorMessage.includes('not found') || errorMessage.includes('model not found')) {
-        if (m < MODELS.length - 1) {
-          console.log(`[Gemini] Model not found, trying: ${MODELS[m + 1]}`);
-          continue;
-        }
-        return { 
-          success: false, 
-          error: 'Model not available',
-          errorType: 'model'
-        };
-      }
-      
-      if (errorCode === 401 || errorMessage.includes('api key') || errorMessage.includes('invalid')) {
-        return { 
-          success: false, 
-          error: 'Invalid API key',
-          errorType: 'invalid_key'
-        };
-      }
-      
-      if (errorMessage.includes('fetch') || errorMessage.includes('network') || errorMessage.includes('timeout')) {
-        return { 
-          success: false, 
-          error: 'Network error',
-          errorType: 'network'
-        };
-      }
-      
-      return { 
-        success: false, 
-        error: errorMessage || 'Unknown error',
-        errorType: 'unknown'
-      };
+
+      const result = await model.generateContent(prompt, { timeout: REQUEST_TIMEOUT_MS });
+      const text = result.response.text();
+      if (!text) throw new Error('Empty response');
+
+      console.log(`[Gemini] Success with model ${modelName}`);
+      return { text, provider: modelName };
+    } catch (err) {
+      const { message, type } = classifyError(err);
+      console.error(`[Gemini] ${modelName} failed: ${message}`);
+
+      // Quota/model errors: fall through to the next model on this key.
+      // Key errors: abandon this key entirely. Others: bubble up.
+      if (type === 'quota' || type === 'model') continue;
+      return { error: message, errorType: type };
     }
   }
-  
-  return { 
-    success: false, 
-    error: 'All models failed',
-    errorType: 'quota'
-  };
+
+  return { error: 'All models exhausted for this key', errorType: 'quota' };
 }
 
-export async function generateContent(prompt: string, ip?: string): Promise<{ 
-  result?: string; 
-  error?: string; 
-  errorType?: 'quota' | 'invalid_key' | 'network' | 'rate_limit' | 'unknown';
-  rateLimitRemaining?: number;
-  rateLimitReset?: number;
-}> {
-  if (ip) {
-    const rateLimit = getRateLimitInfo(ip);
-    if (!rateLimit.allowed) {
-      return { 
-        error: 'You have used your free limit. Please try again in an hour.',
-        errorType: 'rate_limit',
-        rateLimitRemaining: 0,
-        rateLimitReset: rateLimit.resetTime
-      };
-    }
-  }
-  
+/**
+ * Provider chain: every Gemini key × model combination, then Groq (if
+ * configured). Rate limiting lives in lib/ratelimit.ts, not here.
+ */
+export async function generateText(prompt: string): Promise<GenerateTextResult> {
   const apiKeys = getApiKeys();
-  
-  if (apiKeys.length === 0) {
+  if (apiKeys.length === 0 && !isGroqConfigured()) {
     console.error('[Gemini] No API keys configured');
-    return { 
-      error: 'Service configuration error, please contact support',
-      errorType: 'invalid_key'
-    };
+    return { error: 'Service configuration error, please contact support', errorType: 'invalid_key' };
   }
-  
-  for (let keyIndex = 0; keyIndex < apiKeys.length; keyIndex++) {
-    console.log(`[Gemini] Attempting with key ${keyIndex + 1} of ${apiKeys.length}`);
-    
-    const result = await tryGenerateWithKey(apiKeys[keyIndex], prompt, 0);
-    
-    if (result.success && result.result) {
-      return { 
-        result: result.result,
-        rateLimitRemaining: ip ? getRateLimitInfo(ip).remaining : undefined
-      };
-    }
-    
-    if (result.errorType === 'invalid_key') {
-      console.error(`[Gemini] Invalid API key at index ${keyIndex}`);
-      continue;
-    }
-    
-    if (result.errorType === 'quota' || result.errorType === 'model') {
-      console.log(`[Gemini] Key ${keyIndex + 1} exhausted or model unavailable, trying next key`);
-      continue;
-    }
-    
-    if (result.errorType === 'network') {
-      return { 
-        error: 'Connection failed, please check your internet and try again',
-        errorType: 'network'
-      };
-    }
-    
-    return { 
-      error: result.error || 'An unexpected error occurred',
-      errorType: result.errorType
-    };
-  }
-  
-  console.error('[Gemini] All API keys exhausted');
-  return { 
-    error: 'Our AI is very busy right now, please try again in a few hours',
-    errorType: 'quota'
-  };
-}
 
-export function getRateLimitHeaders(ip: string): Record<string, string> {
-  const rateLimit = getRateLimitInfo(ip);
-  return {
-    'X-RateLimit-Limit': MAX_REQUESTS_PER_IP.toString(),
-    'X-RateLimit-Remaining': rateLimit.remaining.toString(),
-    'X-RateLimit-Reset': Math.ceil(rateLimit.resetTime / 1000).toString(),
-  };
+  let lastError: GenerateTextResult | null = null;
+
+  for (let i = 0; i < apiKeys.length; i++) {
+    console.log(`[Gemini] Attempting key ${i + 1} of ${apiKeys.length}`);
+    const result = await tryGeminiKey(apiKeys[i], prompt);
+    if (result.text) return result;
+
+    lastError = result;
+    // Exhausted quota or bad key: rotate to the next key.
+    if (result.errorType === 'quota' || result.errorType === 'model' || result.errorType === 'invalid_key') {
+      continue;
+    }
+    // Network/timeout/unknown: retrying another key is unlikely to help mid-request.
+    break;
+  }
+
+  if (isGroqConfigured()) {
+    console.log('[Gemini] All Gemini options exhausted, falling back to Groq');
+    const groq = await generateWithGroq(prompt);
+    if (groq.success && groq.text) {
+      return { text: groq.text, provider: 'groq' };
+    }
+  }
+
+  if (lastError?.errorType === 'network' || lastError?.errorType === 'timeout') {
+    return { error: 'Connection failed, please try again', errorType: lastError.errorType };
+  }
+  return { error: 'Our AI is very busy right now, please try again later', errorType: 'quota' };
 }

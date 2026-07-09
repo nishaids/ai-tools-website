@@ -627,8 +627,65 @@ body {
   .stat-number {
     font-size: 32px;
   }
-  
+
   .tool-card {
     padding: 20px;
+  }
+}
+
+/* ==========================================================================
+   Print pipeline — browser Print → Save as PDF produces a clean A4 document
+   with selectable text. Only the .print-area (the white "paper") prints.
+   ========================================================================== */
+
+@page {
+  size: A4;
+  margin: 14mm;
+}
+
+/* Backgrounds/colors that must survive printing (sidebars, header bands). */
+.print-exact {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media print {
+  body {
+    background: white !important;
+    overflow: visible !important;
+  }
+
+  /* Hide everything, then reveal only the printable paper. */
+  body * {
+    visibility: hidden;
+  }
+  .print-area,
+  .print-area * {
+    visibility: visible;
+  }
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .no-print,
+  .no-print * {
+    display: none !important;
+  }
+
+  /* Undo the mobile scale transform so print is always full size. */
+  .paper-scale {
+    transform: none !important;
+    width: auto !important;
+  }
+  .scaled-paper-container {
+    height: auto !important;
+    overflow: visible !important;
   }
 }

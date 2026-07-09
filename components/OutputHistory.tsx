@@ -1,105 +1,102 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import type { ToolId } from '@/lib/schemas';
+import { toPlainText } from '@/lib/exporters/text';
 
-interface HistoryEntry {
+/**
+ * Last 5 generations per tool, stored as structured JSON in localStorage,
+ * restorable back into the full renderer with one click.
+ */
+
+export interface HistoryEntry {
   tool: string;
-  output: string;
+  data?: unknown;
+  fallbackText?: string;
+  preview: string;
   timestamp: number;
 }
 
-interface OutputHistoryProps {
-  toolSlug: string;
-  toolName: string;
-}
-
 const MAX_ENTRIES_PER_TOOL = 5;
-const STORAGE_KEY = 'tool_history';
+// v2: structured entries (v1 stored raw strings under 'tool_history').
+const STORAGE_KEY = 'tool_history_v2';
 
-export function saveToHistory(toolSlug: string, output: string) {
+export function saveToHistory(toolId: ToolId, payload: { data?: unknown; fallbackText?: string }): void {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     const history: HistoryEntry[] = raw ? JSON.parse(raw) : [];
 
-    // Add new entry at the beginning
+    const preview = (payload.data !== undefined
+      ? toPlainText(toolId, payload.data)
+      : payload.fallbackText || ''
+    )
+      .replace(/\s+/g, ' ')
+      .slice(0, 100);
+
     history.unshift({
-      tool: toolSlug,
-      output,
+      tool: toolId,
+      data: payload.data,
+      fallbackText: payload.fallbackText,
+      preview,
       timestamp: Date.now(),
     });
 
-    // Keep only the latest MAX entries per tool
-    const toolEntries = new Map<string, number>();
-    const filtered = history.filter((entry) => {
-      const count = toolEntries.get(entry.tool) || 0;
+    // Keep only the latest N entries per tool.
+    const counts = new Map<string, number>();
+    const trimmed = history.filter((entry) => {
+      const count = counts.get(entry.tool) || 0;
       if (count >= MAX_ENTRIES_PER_TOOL) return false;
-      toolEntries.set(entry.tool, count + 1);
+      counts.set(entry.tool, count + 1);
       return true;
     });
 
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(trimmed));
   } catch {
-    // localStorage unavailable
+    // localStorage unavailable or full — history is a nice-to-have
   }
 }
 
-export default function OutputHistory({ toolSlug, toolName }: OutputHistoryProps) {
+interface OutputHistoryProps {
+  toolId: ToolId;
+  /** Restores an entry into the live output view. */
+  onRestore: (entry: HistoryEntry) => void;
+  /** Bump to re-read storage after a new generation. */
+  refreshToken?: number;
+}
+
+export default function OutputHistory({ toolId, onRestore, refreshToken }: OutputHistoryProps) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [isOpen, setIsOpen] = useState(false);
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const history: HistoryEntry[] = JSON.parse(raw);
-        const toolEntries = history.filter((e) => e.tool === toolSlug);
-        setEntries(toolEntries);
-      }
+      const history: HistoryEntry[] = raw ? JSON.parse(raw) : [];
+      setEntries(history.filter((e) => e.tool === toolId));
     } catch {
-      // localStorage unavailable
+      setEntries([]);
     }
-  }, [toolSlug]);
+  }, [toolId]);
 
-  const refreshHistory = useCallback(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const history: HistoryEntry[] = JSON.parse(raw);
-        const toolEntries = history.filter((e) => e.tool === toolSlug);
-        setEntries(toolEntries);
-      }
-    } catch {
-      // localStorage unavailable
-    }
-  }, [toolSlug]);
-
-  // Refresh on visibility change (navigating back)
   useEffect(() => {
-    const handleVisibility = () => {
-      if (document.visibilityState === 'visible') refreshHistory();
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [refreshHistory]);
+    load();
+  }, [load, refreshToken]);
 
   if (entries.length === 0) return null;
 
   const formatTime = (ts: number) => {
-    const date = new Date(ts);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMin = Math.floor(diffMs / 60000);
+    const diffMin = Math.floor((Date.now() - ts) / 60000);
     if (diffMin < 1) return 'Just now';
     if (diffMin < 60) return `${diffMin}m ago`;
     const diffHr = Math.floor(diffMin / 60);
     if (diffHr < 24) return `${diffHr}h ago`;
-    return date.toLocaleDateString();
+    return new Date(ts).toLocaleDateString();
   };
 
   return (
-    <div className="mt-8">
+    <div className="no-print mt-8">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-3 text-sm text-gray-400 hover:text-white transition-colors w-full group"
       >
@@ -117,32 +114,25 @@ export default function OutputHistory({ toolSlug, toolName }: OutputHistoryProps
       </button>
 
       {isOpen && (
-        <div className="mt-4 space-y-3 animate-fade-in">
+        <div className="mt-4 space-y-2.5 animate-fade-in">
           {entries.map((entry, i) => (
-            <div key={entry.timestamp} className="glass rounded-xl overflow-hidden">
+            <div key={entry.timestamp} className="glass rounded-xl px-4 py-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-6 h-6 rounded-lg bg-violet-500/20 flex items-center justify-center text-xs text-violet-400 font-bold shrink-0">
+                  {i + 1}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm text-gray-300 truncate">{entry.preview || 'Generated output'}</p>
+                  <p className="text-xs text-gray-500">{formatTime(entry.timestamp)}</p>
+                </div>
+              </div>
               <button
-                onClick={() => setExpandedIndex(expandedIndex === i ? null : i)}
-                className="w-full px-4 py-3 flex items-center justify-between text-left hover:bg-white/5 transition"
+                type="button"
+                onClick={() => onRestore(entry)}
+                className="shrink-0 text-xs px-3 py-1.5 bg-violet-500/15 hover:bg-violet-500/30 border border-violet-500/30 text-violet-300 rounded-lg transition font-medium"
               >
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-6 h-6 rounded-lg bg-violet-500/20 flex items-center justify-center text-xs text-violet-400 font-bold shrink-0">
-                    {i + 1}
-                  </div>
-                  <span className="text-sm text-gray-300 truncate">
-                    {entry.output.slice(0, 80)}...
-                  </span>
-                </div>
-                <span className="text-xs text-gray-500 whitespace-nowrap ml-3">
-                  {formatTime(entry.timestamp)}
-                </span>
+                Restore
               </button>
-              {expandedIndex === i && (
-                <div className="px-4 pb-4 border-t border-white/5">
-                  <pre className="text-sm text-gray-300 whitespace-pre-wrap leading-relaxed max-h-64 overflow-auto mt-3 font-sans">
-                    {entry.output}
-                  </pre>
-                </div>
-              )}
             </div>
           ))}
         </div>
