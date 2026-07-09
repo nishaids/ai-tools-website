@@ -357,11 +357,6 @@ export default function Home() {
           </div>
         </div>
       </footer>
-
-      {/* Sticky Bar */}
-      <div className="sticky-bar visible">
-        <span className="text-white">🔥 Limited time: All tools are 100% free today! No signup required.</span>
-      </div>
     </div>
   );
 }

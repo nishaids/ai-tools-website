@@ -56,7 +56,6 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showProModal, setShowProModal] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
-  const [showStickyBar, setShowStickyBar] = useState(true);
 
   const formSteps = useMemo(() => {
     if (!tool?.multiStep) return 1;
@@ -323,7 +322,7 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
         )}
       </div>
 
-      <main className="pt-24 pb-32 px-4">
+      <main className="pt-24 pb-16 px-4">
         <div className="max-w-7xl mx-auto">
           {/* Tool Header */}
           <div className="no-print mb-8">
@@ -635,35 +634,6 @@ export default function ToolPage({ params }: { params: { slug: string } }) {
           </div>
         </div>
       </main>
-
-      {/* Affiliate Banner */}
-      <div className="no-print fixed bottom-16 left-0 right-0 glass-dark py-3 px-4 z-40">
-        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
-          <span className="text-gray-400">Powered by</span>
-          <span className="font-semibold gradient-text">Gemini AI</span>
-          <span className="text-gray-400">-</span>
-          <a href="#" className="text-violet-400 hover:text-violet-300 transition">Get your free API key</a>
-        </div>
-      </div>
-
-      {/* Sticky Bar */}
-      {showStickyBar && (
-        <div className="no-print fixed bottom-0 left-0 right-0 bg-gradient-to-r from-amber-500 to-orange-500 py-3 px-4 z-50">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <span className="text-white font-semibold text-sm md:text-base">
-              🔥 Limited time: All tools are 100% free today! No signup required.
-            </span>
-            <button
-              onClick={() => setShowStickyBar(false)}
-              className="text-white/80 hover:text-white ml-4 transition"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      )}
 
       <ProModal isOpen={showProModal} onClose={() => setShowProModal(false)} />
     </div>
