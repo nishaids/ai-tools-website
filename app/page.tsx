@@ -100,12 +100,7 @@ export default function Home() {
         <div className="absolute inset-0 bg-gradient-to-b from-violet-900/20 via-transparent to-transparent" />
         
         <div className="max-w-5xl mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-8 animate-fade-in">
-            <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-            <span className="text-sm text-gray-300">Powered by Gemini AI</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 animate-slide-up">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 mt-8 animate-slide-up">
             Transform Your Career
             <br />
             <span className="gradient-text">with AI</span>
